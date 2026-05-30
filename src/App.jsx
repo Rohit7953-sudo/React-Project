@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const API_KEY = "8d9a02c";
+const DEFAULT_QUERY = "Avengers";
 
 function App() {
   const [search, setSearch] = useState("");
@@ -10,18 +11,26 @@ function App() {
   const [loading, setLoading] = useState(false);
 
  
-  const handleSearch = () => {
-    if (search.trim() === "") return;
-
+  const fetchMovies = (searchTerm) => {
     setLoading(true);
-    setQuery(search);
 
-    fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${search}`)
+    fetch(`https://www.omdbapi.com/?apikey=${API_KEY}&s=${searchTerm}`)
       .then((res) => res.json())
       .then((data) => {
         setMovies(data.Search || []);
         setLoading(false);
+      })
+      .catch(() => {
+        setMovies([]);
+        setLoading(false);
       });
+  };
+
+  const handleSearch = () => {
+    if (search.trim() === "") return;
+
+    setQuery(search);
+    fetchMovies(search);
   };
 
   const getMovieDetails = (id) => {
@@ -35,7 +44,11 @@ function App() {
       });
   };
 
-  
+  useEffect(() => {
+    setQuery(DEFAULT_QUERY);
+    fetchMovies(DEFAULT_QUERY);
+  }, []);
+
   if (selectedMovie) {
     return (
       <div className="container">
